@@ -1,0 +1,22 @@
+
+product_code: "PCB_A"
+station_id: "ST01"
+
+model:
+  family: "yolov8-det"
+  version: "v20251104_0740392"  
+
+timing:
+
+  step_ms: 200
+
+defaults:
+  latency_ms_range: [180, 420]     
+  final_decision_rate_pass: 0.9   
+  overlay_root: "file:///mnt/d/Defect-Detection/data/processed/overlays"
+  raw_root:     "file:///mnt/d/Defect-Detection"
+
+yolo_labels:
+
+  enabled: true
+  classes_file: "models/yolov8-det/latest/labels.txt"  

@@ -1,0 +1,15 @@
+apiVersion: 1
+datasources:
+  - name: ClickHouse AOI
+    type: grafana-clickhouse-datasource
+    access: proxy
+    isDefault: true
+    uid: ch_aoi
+    jsonData:
+      defaultDatabase: aoi
+      server: http://clickhouse:8123
+      tlsSkipVerify: true
+    secureJsonData:
+      basicAuthUser: default
+      basicAuthPassword: ""
+    editable: true

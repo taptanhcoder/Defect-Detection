@@ -1,0 +1,23 @@
+
+kafka:
+  brokers: "localhost:9092"
+  schema_registry: "http://localhost:8081"
+  group_id: "aoi.processor.v1"
+  topic_inference_results: "aoi.inference_results"
+  topic_qc_events: "aoi.qc_events"
+
+clickhouse:
+  http_url: "http://localhost:8123"  
+  database: "aoi"
+  user: "default"
+  password: ""
+  table: "aoi_inspections"
+
+specs:
+  source: "local"                     
+  local_dir: "specs"
+  prefix: "specs"                    
+  ttl_seconds: 600
+
+processor:
+  emit_alerts: true

@@ -1,0 +1,71 @@
+{
+  "title": "AOI Overview",
+  "uid": "aoi_overview",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "editable": true,
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "FPY (5m)",
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "ch_aoi" },
+      "targets": [
+        {
+          "query": "SELECT t_5m AS time, product_code, station_id, pass_cnt/nullIf(total_cnt,0) AS fpy FROM aoi.yield_5m WHERE $__timeFilter(t_5m) ORDER BY time",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percentunit", "decimals": 2, "min": 0, "max": 1 } },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Latency (p50/p95, 5m)",
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "ch_aoi" },
+      "targets": [
+        {
+          "query": "SELECT t_5m AS time, product_code, station_id, quantilesTimingMerge(0.5,0.95)(q_state)[1] AS p50_ms, quantilesTimingMerge(0.5,0.95)(q_state)[2] AS p95_ms FROM aoi.latency_5m WHERE $__timeFilter(t_5m) GROUP BY time, product_code, station_id ORDER BY time",
+          "format": "table"
+        }
+      ],
+      "transformations": [ { "id": "prepareTimeSeries", "options": { "format": "multi" } } ],
+      "fieldConfig": { "defaults": { "unit": "ms", "decimals": 0 } },
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 }
+    },
+    {
+      "type": "table",
+      "title": "Recent 20 (click overlay)",
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "ch_aoi" },
+      "targets": [
+        {
+          "query": "SELECT toDateTime(ts_ms/1000) AS ts, product_code, station_id, aql_final_decision, defect_count, image_overlay_url AS overlay FROM aoi.aoi_inspections WHERE ts >= now() - INTERVAL 7 DAY ORDER BY ts DESC LIMIT 20",
+          "format": "table"
+        }
+      ],
+      "options": { "showHeader": true },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "overlay" },
+            "properties": [
+              { "id": "links", "value": [ { "title": "Open overlay", "url": "${__cell}", "targetBlank": true } ] }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "aql_final_decision" },
+            "properties": [
+              { "id": "mappings", "value": [ { "type": "value", "options": { "PASS": { "index": 0, "text": "PASS" }, "FAIL": { "index": 1, "text": "FAIL" } } } ] },
+              { "id": "thresholds", "value": { "mode": "absolute", "steps": [ { "color": "green" }, { "color": "red", "value": 1 } ] } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "x": 0, "y": 8, "w": 24, "h": 8 }
+    }
+  ],
+  "templating": { "list": [] },
+  "time": { "from": "now-24h", "to": "now" }
+}

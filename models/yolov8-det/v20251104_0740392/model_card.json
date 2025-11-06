@@ -1,0 +1,24 @@
+{
+  "model_family": "yolov8-det",
+  "model_version": "v20251104_0740392",
+  "imgsz": 960,
+  "nc": 4,
+  "names": [
+    "SP",
+    "SC",
+    "HB",
+    "CFO"
+  ],
+  "artifact_run": "m1_yolov8s_det_20251104_0740392",
+  "files": {
+    "model.onnx": {
+      "sha256": "2d53e043db984e36d4a4a68f3d7aa44f46daa145c51ebeee5de3eddb1e6bd4e7",
+      "bytes": 39770039
+    },
+    "best.pt": {
+      "present": true
+    }
+  },
+  "metrics": null,
+  "train_args": null
+}
