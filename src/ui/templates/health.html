@@ -1,0 +1,24 @@
+{% extends "_base.html" %}
+{% block content %}
+<h4 class="mb-3">Health</h4>
+<div class="card-soft p-3">
+  <div class="row g-2">
+    <div class="col-md-4">
+      <div class="small text-secondary">status</div>
+      <div class="fw-semibold">{{ h.status or h.get('status', '?') }}</div>
+    </div>
+    <div class="col-md-4">
+      <div class="small text-secondary">kafka</div>
+      <div class="fw-semibold">{{ h.kafka or h.get('kafka', '?') }}</div>
+    </div>
+    <div class="col-md-4">
+      <div class="small text-secondary">minio</div>
+      <div class="fw-semibold">{{ h.minio or h.get('minio', '?') }}</div>
+    </div>
+  </div>
+  {% if h.error %}
+  <hr>
+  <div class="text-danger small">error: {{ h.error }}</div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "_base.html" %}
+{% block content %}
+<div class="topbar">
+  <h4 class="m-0">Inspections</h4>
+  <form class="d-flex gap-2" method="get">
+    <select class="form-select form-select-sm" name="product">
+      <option value="">All products</option>
+      {% for p in filters.products %}<option value="{{p}}" {% if p==product %}selected{% endif %}>{{p}}</option>{% endfor %}
+    </select>
+    <select class="form-select form-select-sm" name="station">
+      <option value="">All stations</option>
+      {% for s in filters.stations %}<option value="{{s}}" {% if s==station %}selected{% endif %}>{{s}}</option>{% endfor %}
+    </select>
+    <select class="form-select form-select-sm" name="decision">
+      <option value="">All</option>
+      <option value="PASS" {% if decision=='PASS' %}selected{% endif %}>PASS</option>
+      <option value="FAIL" {% if decision=='FAIL' %}selected{% endif %}>FAIL</option>
+    </select>
+    <button class="btn btn-sm btn-primary">Apply</button>
+  </form>
+</div>
+
+<div class="card-soft p-3">
+  <div class="table-responsive">
+    <table class="table table-dark table-hover table-compact align-middle">
+      <thead>
+        <tr>
+          <th>Time</th><th>Product</th><th>Station</th><th>Decision</th><th>#Defects</th><th>Overlay</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if not items or items|length==0 %}
+          <tr><td colspan="7" class="text-secondary">Không có dữ liệu.</td></tr>
+        {% else %}
+          {% for r in items %}
+            {% set dec = (r.aql_final_decision or '')|upper %}
+            {% set badge = 'text-bg-success' if dec=='PASS' else ('text-bg-danger' if dec=='FAIL' else 'text-bg-secondary') %}
+            {% set overlay = r.overlay_url or r.image_overlay_url %}
+            <tr>
+              <td>{{ (r.ts or r.ts_ms) | default('') | string }}</td>
+              <td>{{ r.product_code }}</td>
+              <td>{{ r.station_id }}</td>
+              <td><span class="badge {{ badge }}">{{ dec or '-' }}</span></td>
+              <td>{{ r.defect_count or 0 }}</td>
+              <td>
+                {% if overlay %}<a href="{{ overlay }}" target="_blank">Open</a>{% else %}-{% endif %}
+              </td>
+              <td><a class="btn btn-sm btn-outline-light" href="{{ url_for('inspection_detail', event_id=r.event_id) }}">View</a></td>
+            </tr>
+          {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

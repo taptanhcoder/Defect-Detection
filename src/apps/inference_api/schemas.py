@@ -26,6 +26,8 @@ class DefectItem(BaseModel):
 
 
 class InferResponse(BaseModel):
+    ts_ms: int
+
     event_id: str
     aql_mini_decision: str
     overlay_url: str
@@ -42,6 +44,6 @@ class InferResponse(BaseModel):
 
 class HealthzResponse(BaseModel):
     status: str = "ok"
-    kafka: str = "mock"  
+    kafka: str = "mock"
     minio: str = "unknown"
     details: Dict[str, str] = {}

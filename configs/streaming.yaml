@@ -7,11 +7,15 @@ kafka:
   topic_qc_events: "aoi.qc_events"
 
 clickhouse:
-  http_url: "http://localhost:8123"  
+  http_url: "http://localhost:8123"
   database: "aoi"
   user: "default"
-  password: ""
-  table: "aoi_inspections"
+  password: "280402"
+  bulk:
+    max_rows: 1000      
+    max_seconds: 2 
+
+
 
 specs:
   source: "local"                     

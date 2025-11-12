@@ -17,7 +17,7 @@ def draw_overlay(
     for d in defects:
         b = d["bbox"]
         x, y, w, h = int(b["x"]), int(b["y"]), int(b["w"]), int(b["h"])
-        # clamp vào ảnh
+
         x1 = max(0, min(W - 1, x))
         y1 = max(0, min(H - 1, y))
         x2 = max(0, min(W - 1, x + w))

@@ -1,0 +1,91 @@
+<!-- src/ui/templates/detail.html -->
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <title>{{ title or "AOI • Detail" }}</title>
+    <style>
+      body { font-family: sans-serif; padding: 1rem 2rem; }
+      .row { display: flex; gap: 2rem; }
+      .col { flex: 1; }
+      table { border-collapse: collapse; width: 100%; }
+      th, td { border: 1px solid #ddd; padding: 4px 6px; font-size: 14px; }
+      th { background: #f2f2f2; }
+      img { max-width: 100%; height: auto; border: 1px solid #ccc; }
+      .error-img { color: #c00; font-size: 13px; }
+    </style>
+  </head>
+  <body>
+    <h2>Inspection {{ item.event_id }}</h2>
+    <p>
+      Product: <b>{{ item.product_code }}</b> |
+      Station: <b>{{ item.station_id }}</b> |
+      Decision: <b>{{ item.aql_final_decision }}</b>
+    </p>
+
+    <div class="row">
+      <div class="col">
+        <h3>Ảnh overlay</h3>
+        {% if overlay_url %}
+          <img src="{{ overlay_url }}" alt="overlay"
+               onerror="this.style.display='none';document.getElementById('img-err').style.display='block';">
+          <div id="img-err" class="error-img" style="display:none;">
+            Không tải được ảnh từ MinIO.
+          </div>
+        {% else %}
+          <p>Không có overlay_url.</p>
+        {% endif %}
+
+        {% if raw_url and raw_url != overlay_url %}
+          <h3>Ảnh raw</h3>
+          <img src="{{ raw_url }}" alt="raw">
+        {% endif %}
+      </div>
+
+      <div class="col">
+        <h3>Thông tin</h3>
+        <ul>
+          <li>Timestamp ms: {{ item.ts_ms }}</li>
+          <li>Model: {{ item.model_family }} / {{ item.model_version }}</li>
+          <li>Latency: {{ item.latency_ms }} ms</li>
+          <li>Defect count: {{ item.defect_count }}</li>
+          <li>Fail reason: {{ item.fail_reason }}</li>
+        </ul>
+
+        <h3>Defects</h3>
+        {% if defects and defects|length > 0 %}
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Class</th>
+                <th>Score</th>
+                <th>BBox</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for d in defects %}
+                <tr>
+                  <td>{{ loop.index }}</td>
+                  <td>{{ d.cls or d["cls"] }}</td>
+                  <td>{{ "%.3f"|format(d.score or d["score"]) }}</td>
+                  <td>
+                    {% set bb = d.bbox or d["bbox"] %}
+                    x={{ bb.x or bb["x"] }},
+                    y={{ bb.y or bb["y"] }},
+                    w={{ bb.w or bb["w"] }},
+                    h={{ bb.h or bb["h"] }}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p>Không có defect nào.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <p><a href="{{ url_for('inspections') }}">← quay lại danh sách</a></p>
+  </body>
+</html>

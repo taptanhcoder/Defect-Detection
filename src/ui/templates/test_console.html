@@ -1,0 +1,35 @@
+{% extends "_base.html" %}
+{% block content %}
+<h4 class="mb-3">Test Console</h4>
+
+<form method="post" enctype="multipart/form-data" class="card-soft p-3 mb-3">
+  <div class="row g-3">
+    <div class="col-md-4">
+      <label class="form-label">Product code</label>
+      <input class="form-control" name="product_code" required>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Station ID</label>
+      <input class="form-control" name="station_id" required>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Board serial (optional)</label>
+      <input class="form-control" name="board_serial">
+    </div>
+    <div class="col-md-8">
+      <label class="form-label">Image</label>
+      <input type="file" class="form-control" name="image" accept="image/*" required>
+    </div>
+    <div class="col-md-4 d-flex align-items-end justify-content-end">
+      <button class="btn btn-primary">Send</button>
+    </div>
+  </div>
+</form>
+
+{% if result %}
+<div class="card-soft p-3">
+  <div class="fw-semibold mb-2">API Response</div>
+  <pre class="small text-wrap">{{ result | tojson(indent=2) }}</pre>
+</div>
+{% endif %}
+{% endblock %}

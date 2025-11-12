@@ -1,7 +1,7 @@
 {% extends "_base.html" %}
 {% block content %}
 <div class="topbar">
-  <h4 class="m-0">Overview</h4>
+  <h4 class="m-0">Defect Gallery</h4>
   <form class="d-flex gap-2" method="get">
     <select class="form-select form-select-sm" name="product">
       <option value="">All products</option>
@@ -15,18 +15,11 @@
   </form>
 </div>
 
-<div class="row g-3">
-  <div class="col-12 col-lg-6">
-    <div class="card-soft p-2">
-      <div class="px-2 pt-2 fw-semibold">FPY (5m)</div>
-      <iframe class="panel-iframe" src="{{ fpy_src }}" loading="lazy"></iframe>
-    </div>
+<div class="card-soft p-3">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <div class="fw-semibold">Last defects (FAIL)</div>
+    <div id="gallery-status" class="text-secondary small">idle</div>
   </div>
-  <div class="col-12 col-lg-6">
-    <div class="card-soft p-2">
-      <div class="px-2 pt-2 fw-semibold">Latency avg (5m)</div>
-      <iframe class="panel-iframe" src="{{ lat_src }}" loading="lazy"></iframe>
-    </div>
-  </div>
+  <div id="gallery-grid" class="gallery-grid"></div>
 </div>
 {% endblock %}

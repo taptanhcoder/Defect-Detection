@@ -1,15 +1,15 @@
 apiVersion: 1
 datasources:
-  - name: ClickHouse AOI
+  - name: "ClickHouse AOI"
+    uid: ch_aoi
     type: grafana-clickhouse-datasource
     access: proxy
     isDefault: true
-    uid: ch_aoi
     jsonData:
-      defaultDatabase: aoi
-      server: http://clickhouse:8123
+      server: "http://127.0.0.1:8123"   # BẮT BUỘC: endpoint HTTP của ClickHouse
+      defaultDatabase: "aoi"
       tlsSkipVerify: true
     secureJsonData:
-      basicAuthUser: default
-      basicAuthPassword: ""
-    editable: true
+      username: "default"
+      password: "280402"
+    editable: false   # provisioning ⇒ read-only là bình thường

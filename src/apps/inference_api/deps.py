@@ -12,7 +12,7 @@ from .producer import EventProducer
 
 log = logging.getLogger("aoi.inference_api.deps")
 
-# ---- Module-level singletons ----
+
 _CFG: Dict[str, Any] | None = None
 _FLAGS: Dict[str, Any] | None = None
 _RUNNERS: Dict[str, YoloV8DetONNX] = {}
@@ -29,7 +29,7 @@ def init(config_path: str | Path, project_root: str | Path = ".") -> None:
     _CFG = load_inference_config(config_path, _PROJECT_ROOT)
     _FLAGS = _CFG.get("features", {}) or {}
 
-    # ---- MinIO: có thể tắt bằng ENV hoặc config
+
     mcfg = _CFG.get("minio", {}) or {}
     env_disable_minio = os.getenv("AOI_DISABLE_MINIO", "0").strip() in ("1", "true", "yes")
     cfg_disable_minio = not bool(mcfg.get("enabled", True))
@@ -49,19 +49,18 @@ def init(config_path: str | Path, project_root: str | Path = ".") -> None:
         log.warning("MinIO is DISABLED (AOI_DISABLE_MINIO=%s, config.enabled=%s)",
                     env_disable_minio, mcfg.get("enabled", True))
 
-    # ---- Producer
     kcfg = _CFG.get("kafka", {}) or {}
     topic = str(kcfg.get("topic_results", "aoi.inference_results"))
     _PRODUCER = EventProducer(
         brokers=str(kcfg.get("brokers", "localhost:9092")),
         schema_registry_url=str(kcfg.get("schema_registry", "http://localhost:8081")),
         topic=topic,
-        mock=None,  # để EventProducer tự quyết dựa vào env
+        mock=None,
         jsonl_path=_PROJECT_ROOT / "data" / "processed" / "inference_results.jsonl",
     )
     _IS_MOCK = os.getenv("AOI_PRODUCER_MODE", "").lower().strip() == "mock"
 
-    # ---- Runners map
+
     _RUNNERS.clear()
     stations = (_CFG.get("models", {}) or {}).get("stations", {}) or {}
     for sid, meta in stations.items():
@@ -81,7 +80,7 @@ def shutdown() -> None:
     pass
 
 
-# ---------- getters ----------
+
 def get_config() -> Dict[str, Any]:
     assert _CFG is not None
     return _CFG

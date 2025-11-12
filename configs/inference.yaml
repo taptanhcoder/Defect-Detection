@@ -1,25 +1,32 @@
-app:
-  template_image: null
 
+app:
+
+  template_image: ""
 features:
   enable_registration: false
 
-minio:
-  endpoint: "localhost:9000"
-  access_key: "minioadmin"
-  secret_key: "minioadmin"
-  bucket: "aoi"
-  secure: false
 
 kafka:
   brokers: "localhost:9092"
   schema_registry: "http://localhost:8081"
   topic_results: "aoi.inference_results"
 
+
+minio:
+  endpoint: "127.0.0.1:9002"
+  access_key: "minioadmin"
+  secret_key: "minioadmin"
+  bucket: "aoi"
+  secure: false
+  enabled: true
+
+
 models:
   stations:
     ST01:
       family: "yolov8-det"
+      # đường dẫn này theo đúng cây thư mục bạn gửi
       onnx: "models/yolov8-det/latest/model.onnx"
       labels: "models/yolov8-det/latest/labels.txt"
       imgsz: 960
+

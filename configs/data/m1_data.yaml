@@ -1,0 +1,13 @@
+names:
+- SH
+- SP
+- SC
+- OP
+- MB
+- HB
+- CS
+- CFO
+- BMFO
+nc: 9
+train: /mnt/d/Defect-Detection/data/Data_YOLO/images/train
+val: /mnt/d/Defect-Detection/data/Data_YOLO/images/val

@@ -1,8 +1,5 @@
 from __future__ import annotations
-import io
-import time
-import uuid
-import logging
+import time, uuid, logging
 from typing import Optional, List, Dict
 from pathlib import Path
 
@@ -50,7 +47,7 @@ async def infer(
     # 1) Parse metadata
     meta = InferRequestMeta(product_code=product_code, station_id=station_id, board_serial=board_serial)
 
-    # 2) Nạp ảnh vào numpy BGR
+    # 2) Nạp ảnh
     try:
         raw_bytes = await image.read()
         arr = np.frombuffer(raw_bytes, dtype=np.uint8)
@@ -63,14 +60,14 @@ async def infer(
     cfg = deps.get_config()
     flags = deps.get_flags()
 
-    # 3) Chọn runner theo station_id
+    # 3) Runner
     runner = deps.get_runner(meta.station_id)
     if runner is None:
         raise HTTPException(status_code=400, detail=f"station_id '{meta.station_id}' is not configured")
 
     t0 = time.perf_counter()
 
-    # 4) (optional) registration
+    # 4) Registration (optional)
     img_infer = img_bgr
     if flags.get("enable_registration"):
         tpl_path = (cfg.get("app", {}) or {}).get("template_image")
@@ -82,20 +79,20 @@ async def infer(
             except Exception as e:
                 log.warning("registration failed: %s", e)
 
-    # 5) tiling → predict từng tile
+    # 5) Tiling + predict
     tiles = tile_960(img_infer, tile_size=runner.imgsz, overlap=64)
     tile_preds: List[Dict] = []
     for t in tiles:
         dets_tile = runner.predict_tile(t["tile"])
         tile_preds.append({"xy0": t["xy0"], "dets": dets_tile})
 
-    # 6) merge → defects global
+    # 6) Merge
     defects = merge_tiles(tile_preds, iou_thres=0.5, per_class_nms=True)
 
     # 7) AQL mini
     decision = quick_decision(defects, measures=None, rules=None)
 
-    # 8) overlay & upload / save
+    # 8) Overlay & upload/save
     overlay_bgr = draw_overlay(img_infer, defects)
     event_id = str(uuid.uuid4())
     ts_ms = int(time.time() * 1000)
@@ -106,16 +103,11 @@ async def infer(
     if deps.minio_enabled():
         minio = deps.get_minio()
         try:
-            # (tùy chọn) upload raw nếu muốn
-            # raw_key = minio.make_raw_key(meta.product_code, event_id, ts_ms)
-            # raw_url = minio.put_image(raw_key, img_infer, return_presigned=False)
-
             overlay_key = minio.make_overlay_key(meta.product_code, event_id, ts_ms)
-            overlay_url = minio.put_image(overlay_key, overlay_bgr, return_presigned=False)
+            overlay_url = minio.put_image(overlay_key, overlay_bgr, return_presigned=True)
         except Exception as e:
             log.error("MinIO upload failed: %s", e)
     else:
-        # lưu local
         try:
             overlay_url = _save_overlay_local(meta.product_code, event_id, ts_ms, overlay_bgr)
         except Exception as e:
@@ -123,7 +115,7 @@ async def infer(
 
     latency_ms = int((time.perf_counter() - t0) * 1000)
 
-    # 9) build payload
+    # 9) Payload để ghi DB/Kafka
     model_cfg = deps.get_station_model_cfg(meta.station_id)
     payload = build_inference_payload(
         product_code=meta.product_code,
@@ -145,9 +137,10 @@ async def infer(
     except Exception as e:
         log.error("Publish failed: %s", e)
 
-
+    # 10) Response cho client
     preview = [DefectItem(**d) for d in (defects[:3] if defects else [])]
     resp = InferResponse(
+        ts_ms=ts_ms,                  
         event_id=event_id,
         aql_mini_decision=decision,
         overlay_url=overlay_url,
