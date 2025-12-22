@@ -33,7 +33,8 @@
           <tr><td colspan="7" class="text-secondary">Không có dữ liệu.</td></tr>
         {% else %}
           {% for r in items %}
-            {% set dec = (r.aql_final_decision or '')|upper %}
+            {# ưu tiên aql_final_decision, nếu không có thì dùng aql_mini_decision #}
+            {% set dec = (r.aql_final_decision or r.aql_mini_decision or '')|upper %}
             {% set badge = 'text-bg-success' if dec=='PASS' else ('text-bg-danger' if dec=='FAIL' else 'text-bg-secondary') %}
             {% set overlay = r.overlay_url or r.image_overlay_url %}
             <tr>

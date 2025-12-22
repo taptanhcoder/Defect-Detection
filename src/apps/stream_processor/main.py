@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 import os
 import sys
@@ -6,11 +7,11 @@ import time
 import logging
 from pathlib import Path
 
-from src.pipelines.kafka_consumer import KafkaJSONConsumer, load_streaming_config as load_stream_cfg
-from src.pipelines.clickhouse_writer import ClickHouseWriter 
-from src.apps.stream_processor.spec_loader import SpecRepository 
-from src.apps.stream_processor.handlers import handle_inference_result 
-from src.apps.stream_processor.producer import QCEventProducer 
+from pipelines.kafka_consumer import KafkaAvroConsumer, load_streaming_config as load_stream_cfg
+from src.pipelines.clickhouse_writer import ClickHouseWriter
+from src.apps.stream_processor.spec_loader import SpecRepository
+from src.apps.stream_processor.handlers import handle_inference_result
+from src.apps.stream_processor.producer import QCEventProducer
 
 
 logging.basicConfig(
@@ -31,8 +32,9 @@ def main():
     cfg_path = os.getenv("AOI_STREAMING_CONFIG", "configs/streaming.yaml")
     cfg = load_stream_cfg(cfg_path)
 
-    # ---- Kafka consumer
-    consumer = KafkaJSONConsumer.from_yaml(cfg_path)
+    # ---- Kafka consumer (AVRO) ----
+    # Inference API publish Avro (AoiInferenceResultV1) → dùng KafkaAvroConsumer
+    consumer = KafkaAvroConsumer.from_yaml(cfg_path)
     consumer.subscribe()
 
     # ---- ClickHouse writer
@@ -60,8 +62,10 @@ def main():
     signal.signal(signal.SIGINT, _sig_handler)
     signal.signal(signal.SIGTERM, _sig_handler)
 
-    log.info("Stream Processor started. bulk_rows=%s bulk_secs=%s alerts=%s",
-             ck_bulk_rows, ck_bulk_secs, alerts_enabled)
+    log.info(
+        "Stream Processor started. bulk_rows=%s bulk_secs=%s alerts=%s",
+        ck_bulk_rows, ck_bulk_secs, alerts_enabled
+    )
 
     idle_backoff = 0.2
     last_flush_ts = time.monotonic()
@@ -95,7 +99,6 @@ def main():
                 last_flush_ts = time.monotonic()
 
     finally:
-
         try:
             ck.flush()
         except Exception:
@@ -105,6 +108,7 @@ def main():
         except Exception:
             pass
         log.info("Stream Processor stopped.")
+
 
 if __name__ == "__main__":
     sys.exit(main())

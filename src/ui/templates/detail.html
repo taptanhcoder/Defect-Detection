@@ -49,7 +49,7 @@
           <li>Model: {{ item.model_family }} / {{ item.model_version }}</li>
           <li>Latency: {{ item.latency_ms }} ms</li>
           <li>Defect count: {{ item.defect_count }}</li>
-          <li>Fail reason: {{ item.fail_reason }}</li>
+          <li>Fail reason: {{ fail_reason_ui }}</li>
         </ul>
 
         <h3>Defects</h3>
@@ -58,19 +58,20 @@
             <thead>
               <tr>
                 <th>#</th>
-                <th>Class</th>
+                <th>Loại lỗi</th>
                 <th>Score</th>
                 <th>BBox</th>
               </tr>
             </thead>
             <tbody>
               {% for d in defects %}
+                {% set cls = d.ui_label or d.cls or d["cls"] %}
+                {% set bb = d.bbox or d["bbox"] %}
                 <tr>
                   <td>{{ loop.index }}</td>
-                  <td>{{ d.cls or d["cls"] }}</td>
+                  <td>{{ cls }}</td>
                   <td>{{ "%.3f"|format(d.score or d["score"]) }}</td>
                   <td>
-                    {% set bb = d.bbox or d["bbox"] %}
                     x={{ bb.x or bb["x"] }},
                     y={{ bb.y or bb["y"] }},
                     w={{ bb.w or bb["w"] }},

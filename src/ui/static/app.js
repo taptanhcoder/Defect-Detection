@@ -10,9 +10,15 @@ function qsGet(name) {
   return url.searchParams.get(name) || "";
 }
 
+// Quy ước: ưu tiên aql_final_decision, nếu không có thì fallback aql_mini_decision, rồi aql_decision
+function getDecisionField(r) {
+  return r.aql_final_decision ?? r.aql_mini_decision ?? r.aql_decision ?? '';
+}
+
 // ----------- Live table -----------
 function rowHtml(r) {
-  const dec = String(r.aql_final_decision || '').toUpperCase();
+  const decRaw = getDecisionField(r);
+  const dec = String(decRaw || '').toUpperCase();
   const badge = dec === 'PASS' ? 'text-bg-success' : (dec === 'FAIL' ? 'text-bg-danger' : 'text-bg-secondary');
   const overlay = r.overlay_url ? `<a href="${r.overlay_url}" target="_blank">Open</a>` : (r.image_overlay_url ? `<a href="${r.image_overlay_url}" target="_blank">Open</a>` : '-');
   return `
@@ -59,7 +65,8 @@ function startLive() {
 // ----------- Defect Gallery -----------
 function galleryCardHtml(item) {
   const ts = fmtTs(item.ts || item.ts_ms);
-  const dec = String(item.aql_final_decision || 'FAIL').toUpperCase();
+  const decRaw = getDecisionField(item);
+  const dec = String(decRaw || 'FAIL').toUpperCase();
   const badge = dec === 'PASS' ? 'text-bg-success' : (dec === 'FAIL' ? 'text-bg-danger' : 'text-bg-secondary');
   const thumb = item.overlay_url || item.image_overlay_url || ''; // may be empty (need presign)
   const viewLink = `/inspections/${item.event_id}`;
