@@ -86,9 +86,9 @@ The system is organized into five main layers:
 
 The overall pipeline is summarized in the diagram below:
 
-```markdown
+
 ![AOI Pipeline](aoi_pipeline.png)
-````
+
 
 > Place `aoi_pipeline.png` at the repository root (or adjust the path above, e.g. `docs/aoi_pipeline.png`).
 
